@@ -57,6 +57,9 @@ func runUntar(ctx context.Context, opt untarOptions, args []string) error {
 	input := args[0]
 	targetDir := args[1]
 
+	// Output filesystem to be used
+	fs := desync.NewDiskFS(targetDir)
+
 	// If we got a catar file unpack that and exit
 	if !opt.readIndex {
 		f, err := os.Open(input)
@@ -77,7 +80,7 @@ func runUntar(ctx context.Context, opt untarOptions, args []string) error {
 			pb.SetTotal(int(info.Size()))
 			r = io.TeeReader(f, pb)
 		}
-		return desync.UnTar(ctx, r, targetDir, opt.UntarOptions)
+		return desync.UnTar(ctx, r, fs, opt.UntarOptions)
 	}
 
 	s, err := MultiStoreWithCache(opt.cmdStoreOptions, opt.cache, opt.stores...)
@@ -92,5 +95,5 @@ func runUntar(ctx context.Context, opt untarOptions, args []string) error {
 		return err
 	}
 
-	return desync.UnTarIndex(ctx, targetDir, index, s, opt.n, opt.UntarOptions, NewProgressBar("Unpacking "))
+	return desync.UnTarIndex(ctx, fs, index, s, opt.n, opt.UntarOptions, NewProgressBar("Unpacking "))
 }
