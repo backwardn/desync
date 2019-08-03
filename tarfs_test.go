@@ -17,7 +17,7 @@ func TestGnuTarWrite(t *testing.T) {
 	defer r.Close()
 
 	// Expected output
-	exp, err := ioutil.ReadFile("testdata/complex.tar")
+	exp, err := ioutil.ReadFile("testdata/complex.gnu-tar")
 	if err != nil {
 		t.Fatal(err)
 	}

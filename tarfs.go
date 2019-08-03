@@ -7,7 +7,8 @@ import (
 
 // TarWriteFS uses a GNU tar archive for tar/untar operations of a catar archive.
 type TarWriteFS struct {
-	w *gnutar.Writer
+	w      *gnutar.Writer
+	format gnutar.Format
 }
 
 var _ UntarFilesystem = TarWriteFS{}
@@ -15,7 +16,7 @@ var _ UntarFilesystem = TarWriteFS{}
 // NewTarFS initializes a new instance of a GNU tar archive that can be used
 // for catar archive tar/untar operations.
 func NewTarWriteFS(w io.Writer) TarWriteFS {
-	return TarWriteFS{gnutar.NewWriter(w)}
+	return TarWriteFS{gnutar.NewWriter(w), gnutar.FormatGNU}
 }
 
 func (fs TarWriteFS) CreateDir(n NodeDirectory, opts UntarOptions) error {
@@ -27,6 +28,7 @@ func (fs TarWriteFS) CreateDir(n NodeDirectory, opts UntarOptions) error {
 		Mode:     int64(n.Mode),
 		ModTime:  n.MTime,
 		Xattrs:   n.Xattrs,
+		Format:   fs.format,
 	}
 	return fs.w.WriteHeader(hdr)
 }
@@ -41,6 +43,7 @@ func (fs TarWriteFS) CreateFile(n NodeFile, opts UntarOptions) error {
 		ModTime:  n.MTime,
 		Size:     int64(n.Size),
 		Xattrs:   n.Xattrs,
+		Format:   fs.format,
 	}
 	if err := fs.w.WriteHeader(hdr); err != nil {
 		return err
@@ -59,6 +62,7 @@ func (fs TarWriteFS) CreateSymlink(n NodeSymlink, opts UntarOptions) error {
 		Mode:     int64(n.Mode),
 		ModTime:  n.MTime,
 		Xattrs:   n.Xattrs,
+		Format:   fs.format,
 	}
 	return fs.w.WriteHeader(hdr)
 }
